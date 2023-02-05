@@ -12,11 +12,10 @@ public class bill_system {
     private static String url="jdbc:mysql://localhost:3306/cc11";
     private static Scanner in=new Scanner(System.in);
     
-    static void new_bill(Connection con) throws SQLException
+    static void new_bill(Connection con)
     {
         System.out.println();
         String query="insert into gst_bill_system(customer_name,item_name,item_quantity,date,total_amount,item_category) values(?,?,?,(select curdate()),?,?)";
-        PreparedStatement pstmt=con.prepareStatement(query);
         System.out.print("Enter Customer's Name- ");
         customer_name=in.nextLine();
         System.out.print("Enter item name- ");
@@ -33,38 +32,53 @@ public class bill_system {
         // System.out.println(((double)18 / (double)100) * total_amount);
         total_amount+=gst;
         // System.out.println("gst="+gst+" total="+total_amount);
-        pstmt.setString(1, customer_name);
-        pstmt.setString(2, item_name);
-        pstmt.setInt(3, item_quantity);
-        BigDecimal val=new BigDecimal(total_amount);
-        pstmt.setBigDecimal(4, val);
-        pstmt.setString(5,category);
-        pstmt.executeUpdate();
+        try{
+            PreparedStatement pstmt=con.prepareStatement(query);
+            pstmt.setString(1, customer_name);
+            pstmt.setString(2, item_name);
+            pstmt.setInt(3, item_quantity);
+            BigDecimal val=new BigDecimal(total_amount);
+            pstmt.setBigDecimal(4, val);
+            pstmt.setString(5,category);
+            pstmt.executeUpdate();
+        }
+        catch(SQLException e){
+            System.out.println(e.getMessage());
+            return;
+        }
     }
 
-    static void view_bill(Connection con) throws SQLException
+    static void view_bill(Connection con)
     {
         System.out.println();
         String query="select * from gst_bill_system where bill_no=?";
-        PreparedStatement pstmt=con.prepareStatement(query);
-        System.out.print("Enter the bill no. to view the bill- ");
-        bill_no=in.nextInt();
-
-        pstmt.setInt(1, bill_no);
-        ResultSet res=pstmt.executeQuery();
-        if(!res.next())
-        {
-            System.err.println("No record found\n");
-            return ;
+        BigDecimal paid=null;
+        String applied_gst=null;
+        try {
+            PreparedStatement pstmt=con.prepareStatement(query);
+            System.out.print("Enter the bill no. to view the bill- ");
+            bill_no=in.nextInt();
+    
+            pstmt.setInt(1, bill_no);
+            ResultSet res=pstmt.executeQuery();
+            if(!res.next())
+            {
+                System.err.println("No record found\n");
+                return ;
+            }
+            customer_name=res.getString(2);
+            item_name=res.getString(3);
+            item_quantity=res.getInt(4);
+            applied_gst=res.getString(5);
+            date=res.getDate(6);
+            paid=res.getBigDecimal(7);
+            // total_amount=val.doubleValue();
+            category=res.getString(6);  
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            // e.printStackTrace();
+            return;
         }
-        customer_name=res.getString(2);
-        item_name=res.getString(3);
-        item_quantity=res.getInt(4);
-        String applied_gst=res.getString(5);
-        date=res.getDate(6);
-        BigDecimal paid=res.getBigDecimal(7);
-        // total_amount=val.doubleValue();
-        category=res.getString(6);
 
         System.out.println("\nHere's your Bill.\n");
         System.out.println("Dated- "+date);
@@ -75,17 +89,18 @@ public class bill_system {
         in.nextLine();
     }
 
-    public static void main(String args[]) throws Exception
+    public static void main(String args[]) 
     {
+        Connection con=null;
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");
+            con=DriverManager.getConnection(url,"temp", "pass");
         }
-        catch(Exception e)
+        catch(SQLException | ClassNotFoundException ex)
         {
-            e.printStackTrace();
+            ex.printStackTrace();
+            System.exit(0);
         }
-
-        Connection con=DriverManager.getConnection(url,"bishnu","Bishnupass");
         int ch=0;
         while(true){
             System.out.println("1. Create a New Bill. \n2. View Bill \n3. Exit\n");
@@ -100,9 +115,17 @@ public class bill_system {
                         view_bill(con);
                         break;
                 case 3:
-                        con.close();
-                        in.close();
-                        System.exit(0);
+                        try{
+                            con.close();
+                        }
+                        catch(SQLException e)
+                        {
+                            System.out.println(e.getMessage());
+                        }
+                        finally{
+                            in.close();
+                            System.exit(0);
+                        }
                 default:
                         System.out.println("Invalid choice, please try again.");
             }
