@@ -15,7 +15,7 @@ public class frequency {
             e.printStackTrace();
         }
         String url="jdbc:mysql://localhost:3306/test";
-        Connection con=DriverManager.getConnection(url, "bishnu", "Bishnupass");
+        Connection con=DriverManager.getConnection(url, "temp", "dummy");
         System.out.println("Enter the string: ");
         str=in.nextLine();
         in.close();

@@ -69,7 +69,7 @@ public class mcq{
         {
             e.printStackTrace();
         }
-        Connection con=DriverManager.getConnection(url,"bishnu","Bishnupass");
+        Connection con=DriverManager.getConnection(url,"temp","dummy");
         int choice;
         while(true)
         {

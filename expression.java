@@ -17,7 +17,7 @@ public class expression {
         }
         System.out.print("Enter the expression:- ");
         exp=in.nextLine();
-        Connection con=DriverManager.getConnection(url, "bishnu", "Bishnupass");
+        Connection con=DriverManager.getConnection(url, "temp", "dummy");
         String query="insert into expression(expression,ans) values(?,(select "+exp+"))";
         // String calc="select "+exp;
         // Statement stmt=con.createStatement();
