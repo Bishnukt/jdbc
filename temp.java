@@ -8,7 +8,7 @@ public static void main(String[] args) throws ClassNotFoundException,SQLExceptio
 {
 	System.out.println(driver);
 	Class.forName(driver);
-	Connection c=DriverManager.getConnection(con,"bishnu","Bishnupass");
+	Connection c=DriverManager.getConnection(con,"temp","dummy");
 	System.out.println("Worked.");
 }
 }
